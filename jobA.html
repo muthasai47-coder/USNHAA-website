@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Budget Tracker</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 25px;
+        }
+
+        header span {
+            color: #60a5fa;
+        }
+
+        .container {
+            width: 86%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .welcome p {
+            color: #6b7280;
+        }
+
+        /* Summary Cards */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .card h2 {
+            font-size: 26px;
+        }
+
+        .budget h2 {
+            color: #2563eb;
+        }
+
+        .spent h2 {
+            color: #ef4444;
+        }
+
+        .remaining h2 {
+            color: #16a34a;
+        }
+
+        .income h2 {
+            color: #9333ea;
+        }
+
+        /* Main Grid */
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .box h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Form */
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        /* Progress */
+
+        .progress-section {
+            margin-top: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 13px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: #2563eb;
+            transition: 0.4s;
+        }
+
+        /* Transactions */
+
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .transaction:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #eff6ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .transaction-info small {
+            color: #777;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #ef4444;
+        }
+
+        .empty {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Smart Tip */
+
+        .tip {
+            margin-top: 25px;
+            background: #eff6ff;
+            border-left: 5px solid #2563eb;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .tip h3 {
+            margin-bottom: 7px;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px;
+            }
+
+            .container {
+                width: 92%;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome h2 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>💰 USNHAA <span>Budget</span> Tracker</h1>
+    <div>Dashboard</div>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Good Morning 👋</h2>
+        <p>Track your money. Control your spending. Reach your goals.</p>
+    </div>
+
+    <!-- Summary Cards -->
+
+    <div class="cards">
+
+        <div class="card budget">
+            <h3>Monthly Budget</h3>
+            <h2 id="budgetDisplay">₹0</h2>
+        </div>
+
+        <div class="card spent">
+            <h3>Total Spent</h3>
+            <h2 id="spentDisplay">₹0</h2>
+        </div>
+
+        <div class="card remaining">
+            <h3>Remaining</h3>
+            <h2 id="remainingDisplay">₹0</h2>
+        </div>
+
+        <div class="card income">
+            <h3>Total Income</h3>
+            <h2 id="incomeDisplay">₹0</h2>
+        </div>
+
+    </div>
+
+    <div class="main-grid">
+
+        <!-- Budget & Expense Form -->
+
+        <div class="box">
+
+            <h2>➕ Add Transaction</h2>
+
+            <label>Transaction Type</label>
+
+            <select id="type">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+            </select>
+
+            <label>Description</label>
+
+            <input
+                type="text"
+                id="description"
+                placeholder="Example: Food, Salary..."
+            >
+
+            <label>Amount</label>
+
+            <input
+                type="number"
+                id="amount"
+                placeholder="Enter amount"
+            >
+
+            <label>Category</label>
+
+            <select id="category">
+                <option>🍔 Food</option>
+                <option>🚌 Travel</option>
+                <option>🛍 Shopping</option>
+                <option>🏠 Bills</option>
+                <option>🎮 Entertainment</option>
+                <option>💊 Health</option>
+                <option>📚 Education</option>
+                <option>📦 Other</option>
+            </select>
+
+            <button onclick="addTransaction()">
+                Add Transaction
+            </button>
+
+            <div class="progress-section">
+
+                <strong>Budget Usage</strong>
+
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+
+                <p id="percentageText">0% used</p>
+
+            </div>
+
+        </div>
+
+        <!-- Transactions -->
+
+        <div class="box">
+
+            <h2>📋 Recent Transactions</h2>
+
+            <div id="transactions">
+
+                <div class="empty">
+                    No transactions yet.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Smart Tip -->
+
+    <div class="tip">
+
+        <h3>💡 Smart Tip</h3>
+
+        <p id="smartTip">
+            Add your first transaction to get a smart spending suggestion.
+        </p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // -----------------------------
+    // Initial Data
+    // -----------------------------
+
+    let budget = 25000;
+
+    let totalSpent = 0;
+
+    let totalIncome = 0;
+
+    let transactions = [];
+
+
+    // -----------------------------
+    // Add Transaction
+    // -----------------------------
+
+    function addTransaction() {
+
+        const type = document.getElementById("type").value;
+
+        const description =
+            document.getElementById("description").value.trim();
+
+        const amount =
+            Number(document.getElementById("amount").value);
+
+        const category =
+            document.getElementById("category").value;
+
+
+        if (description === "" || amount <= 0) {
+
+            alert("Please enter valid transaction details.");
+
+            return;
+        }
+
+
+        const transaction = {
+
+            type: type,
+
+            description: description,
+
+            amount: amount,
+
+            category: category
+
+        };
+
+
+        transactions.unshift(transaction);
+
+
+        if (type === "expense") {
+
+            totalSpent += amount;
+
+        } else {
+
+            totalIncome += amount;
+
+        }
+
+
+        updateDashboard();
+
+
+        document.getElementById("description").value = "";
+
+        document.getElementById("amount").value = "";
+
+    }
+
+
+    // -----------------------------
+    // Update Dashboard
+    // -----------------------------
+
+    function updateDashboard() {
+
+        const remaining = budget - totalSpent;
+
+
+        document.getElementById("budgetDisplay").innerText =
+            "₹" + budget.toLocaleString("en-IN");
+
+
+        document.getElementById("spentDisplay").innerText =
+            "₹" + totalSpent.toLocaleString("en-IN");
+
+
+        document.getElementById("remainingDisplay").innerText =
+            "₹" + remaining.toLocaleString("en-IN");
+
+
+        document.getElementById("incomeDisplay").innerText =
+            "₹" + totalIncome.toLocaleString("en-IN");
+
+
+        // Budget progress
+
+        let percentage = (totalSpent / budget) * 100;
+
+        if (percentage > 100) {
+
+            percentage = 100;
+
+        }
+
+
+        document.getElementById("progress").style.width =
+            percentage + "%";
+
+
+        document.getElementById("percentageText").innerText =
+            Math.round((totalSpent / budget) * 100) + "% used";
+
+
+        updateTransactions();
+
+        updateSmartTip();
+
+    }
+
+
+    // -----------------------------
+    // Show Transactions
+    // -----------------------------
+
+    function updateTransactions() {
+
+        const container =
+            document.getElementById("transactions");
+
+
+        container.innerHTML = "";
+
+
+        if (transactions.length === 0) {
+
+            container.innerHTML =
+                '<div class="empty">No transactions yet.</div>';
+
+            return;
+
+        }
+
+
+        transactions.slice(0, 8).forEach(function(item) {
+
+            const div = document.createElement("div");
+
+            div.className = "transaction";
+
+
+            const sign =
+                item.type === "income" ? "+" : "-";
+
+
+            const amountClass =
+                item.type === "income" ? "incomeAmount" : "amount";
+
+
+            div.innerHTML = `
+
+                <div class="transaction-info">
+
+                    <div class="icon">
+                        ${item.category.split(" ")[0]}
+                    </div>
+
+                    <div>
+                        <strong>${item.description}</strong>
+                        <br>
+                        <small>${item.category}</small>
+                    </div>
+
+                </div>
+
+                <div class="${amountClass}">
+                    ${sign} ₹${item.amount.toLocaleString("en-IN")}
+                </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+        });
+
+    }
+
+
+    // -----------------------------
+    // Smart Suggestions
+    // -----------------------------
+
+    function updateSmartTip() {
+
+        const tip =
+            document.getElementById("smartTip");
+
+
+        const percentage =
+            (totalSpent / budget) * 100;
+
+
+        if (totalSpent === 0) {
+
+            tip.innerText =
+                "Add your first transaction to get a smart spending suggestion.";
+
+        }
+
+        else if (percentage >= 100) {
+
+            tip.innerText =
+                "⚠️ Your budget is completely used. Try reducing unnecessary expenses.";
+
+        }
+
+        else if (percentage >= 80) {
+
+            tip.innerText =
+                "⚠️ You have used more than 80% of your budget. Spend carefully for the remaining days.";
+
+        }
+
+        else if (percentage >= 50) {
+
+            tip.innerText =
+                "👍 You have used more than half of your budget. Keep an eye on your spending.";
+
+        }
+
+        else {
+
+            tip.innerText =
+                "🎉 Great job! Your spending is currently under control.";
+
+        }
+
+    }
+
+
+    // -----------------------------
+    // Start Dashboard
+    // -----------------------------
+
+    updateDashboard();
+
+</script>
+
+</body>
+</html>
